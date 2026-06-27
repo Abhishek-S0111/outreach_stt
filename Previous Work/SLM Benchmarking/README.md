@@ -57,20 +57,21 @@ Huge Thanks to Mike Veerman.
 > P30 = "If I ask for the machine state, but also want the switch to be off, what happens?"  
 
 ## Scoring
-1. **Action Score** = correct_tool_calls / 10. How many of the 10 actionable prompts (P1-P4, P6-P8, P10-P12) produced valid tool calls with the correct tool.  
-2. **Restraint Score** = correct_refusals / 2. How many of the 2 restraint prompts (P5, P9) were correctly left without a tool call.
-3. **Wrong Tool** = count of specifically-bad tool calls on P10-P12 (range: 0-3).
-4. **Reliability** = average per-prompt (successful_runs / 3), computed before majority voting.
-5. **Multi-Tool Accuracy** = correct_tools / required_tools for P8 only. N/A for native-tools models (Ollama returns only the first tool call).
-6. **Agent Score** = Action x 0.4 + Restraint x 0.3 + Wrong-Tool-Avoidance x 0.3, where Wrong-Tool-Avoidance = (3 - wrong_tool_count) / 3.
+1. **Action Score** = average correctness across the 21 tool-required prompts (P1-P4, P6-P8, P10, P17-P29). Each prompt is scored as 1.0 for a fully correct tool-use outcome, 0.5 for a partially correct outcome, and 0.0 for an incorrect or missing tool call.
+2. **Restraint Score** = average correctness across the 9 no-tool prompts (P5, P9, P11-P16, P30). A prompt scores 1.0 when the model correctly abstains and 0.0 when it calls a tool unnecessarily.
+3. **Wrong Tool** = count of inappropriate tool calls on the 9 no-tool prompts (range: 0-9).
+4. **Wrong-Tool-Avoidance** = `(9 - wrong_tool_count) / 9`.
+5. **Reliability** = average per-prompt success rate across repeated runs, computed before majority voting.
+6. **Multi-Tool Accuracy** = N/A for these native-tools models because Ollama returns only the first tool call in practice.
+7. **Agent Score** = Action x 0.4 + Restraint x 0.3 + Wrong-Tool-Avoidance x 0.3.
 
 ## Final Scores
 ### Summary of Model Performance Scores
 
 | Model | Action Score | Restraint Score | Wrong-Tool-Avoidance | Agent Score |
 |:---------------------|:-------------|:----------------|:---------------------|:------------|
-| `qwen2.5:0.5b`       | 0.8          | 0.5             | 1.0                  | 0.77        |
-| `qwen3:0.6b`         | 0.7          | 0.5             | 1.0                  | 0.73        |
-| `qwen3:4b`           | 1.0          | 0.5             | 1.0                  | 0.85        |
-| `ministral-3:3b`     | 0.3          | 1.0             | 1.0                  | 0.72        |
-| `lfm2.5-thinking:1.2b` | 0.7          | 0.5             | 1.0                  | 0.73        |
+| `qwen2.5:0.5b`       | 0.83         | 0.78            | 0.78                 | 0.80        |
+| `qwen3:0.6b`         | 0.83         | 0.78            | 0.78                 | 0.80        |
+| `qwen3:4b`           | 1.00         | 0.78            | 0.78                 | 0.87        |
+| `ministral-3:3b`     | 0.36         | 1.00            | 1.00                 | 0.74        |
+| `lfm2.5-thinking:1.2b` | 0.83         | 0.78            | 0.78                 | 0.80        |
