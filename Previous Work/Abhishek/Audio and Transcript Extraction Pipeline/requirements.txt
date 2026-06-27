@@ -1,0 +1,9 @@
+yt-dlp
+pandas
+pydub
+youtube-transcript-api
+ffmpeg-python
+# Optional (for transcription workflows):
+transformers
+torch
+whisper-jax
