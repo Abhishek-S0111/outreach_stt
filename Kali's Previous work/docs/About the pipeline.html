@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pipeline Presentation - YouTube Audio Dataset Extraction Pipeline</title>
-    
+
     <!-- Google Fonts: Cormorant Garamond (Oleragie Style Serif) & Archivo (Variable Width/Weight for Condensed Apple Style) & JetBrains Mono (Code) & Plus Jakarta Sans (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,400&family=Archivo:wdth,wght@75..125,100..900&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,400&family=Archivo:wdth,wght@75..125,100..900&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <!-- CSS Styling for High-Contrast Light Theme Bold Minimalist Pitch Deck -->
     <style>
@@ -19,7 +22,8 @@
             --text-secondary: #444444;
             --border-color: #000000;
             --accent-color: #000000;
-            --font-display: 'Cormorant Garamond', Georgia, serif; /* Oleragie style */
+            --font-display: 'Cormorant Garamond', Georgia, serif;
+            /* Oleragie style */
             --font-bold-short: 'Archivo', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
             --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
         }
@@ -58,7 +62,8 @@
             height: 78vh;
             background-color: var(--card-bg);
             border: 4px solid var(--border-color);
-            border-radius: 0px; /* Sharp, modern minimalist edges */
+            border-radius: 0px;
+            /* Sharp, modern minimalist edges */
             padding: 70px 90px;
             position: absolute;
             opacity: 0;
@@ -413,14 +418,17 @@
         .slide::-webkit-scrollbar {
             width: 8px;
         }
+
         .slide::-webkit-scrollbar-track {
             background: #ffffff;
         }
+
         .slide::-webkit-scrollbar-thumb {
             background: #222222;
         }
     </style>
 </head>
+
 <body>
 
     <!-- Main Slide Display Area -->
@@ -430,7 +438,9 @@
         <div class="slide active title-slide">
             <h1>YADEP: YOUTUBE DATASET<br>EXTRACTION PIPELINE</h1>
             <p>A Robust, Memory-Guarded Audio & Transcript Acquisition Engine for Machine Learning</p>
-            <p style="font-size: 1.1rem; margin-top: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary);">Kali's Previous Work &bull; Day 02 Pipeline</p>
+            <p
+                style="font-size: 1.1rem; margin-top: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary);">
+                Kali's Previous Work &bull; Day 02 Pipeline</p>
         </div>
 
         <!-- Slide 2: Problem Statement -->
@@ -442,19 +452,29 @@
             <div class="slide-content-center">
                 <h3>Compiling Punjabi Agricultural STT Corpora</h3>
                 <p class="slide-body-text" style="font-size: 1.25rem; margin-bottom: 25px; text-align: center;">
-                    Developing automatic speech recognition (ASR) voice assistance for local Punjabi farmers:
+                    Building high-fidelity Automatic Speech Recognition (ASR) datasets for agricultural outreach
+                    programs (e.g., <em>Krishi Darshan</em>) poses unique operational challenges:
                 </p>
-                <div style="display: flex; gap: 40px; width: 100%; max-width: 900px; margin-top: 15px; text-align: left;">
+                <div
+                    style="display: flex; gap: 40px; width: 100%; max-width: 900px; margin-top: 15px; text-align: left;">
                     <div style="flex: 1; border-right: 1px solid var(--border-color); padding-right: 25px;">
-                        <h4 style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 8px;">Target Source</h4>
-                        <p style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
-                            Ingest public agricultural outreach programming (such as Doordarshan's <em>Krishi Darshan</em>) containing rich local dialects, crop terms, and farmer interviews.
+                        <h4
+                            style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 8px;">
+                            Rate Throttling & Blocks</h4>
+                        <p
+                            style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
+                            Scraping and downloading large-scale video/audio playlist assets directly from YouTube
+                            frequently triggers platform rate blocks and IP bans.
                         </p>
                     </div>
                     <div style="flex: 1; padding-left: 15px;">
-                        <h4 style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 8px;">Target Objective</h4>
-                        <p style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
-                            Establish an automated extraction and cleaning workflow to generate high-fidelity, aligned audio-text training pairs for downstream ASR models.
+                        <h4
+                            style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 8px;">
+                            RAM Crashes & Resource Limits</h4>
+                        <p
+                            style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
+                            Transcribing continuous hours of audio in a single pass exhausts GPU VRAM and system memory,
+                            leading to kernel crashes and execution failures.
                         </p>
                     </div>
                 </div>
@@ -470,27 +490,36 @@
             <div class="slide-content-center">
                 <h3>Batch Ingestion & Local Whisper ASR</h3>
                 <p class="slide-body-text" style="font-size: 1.25rem; margin-bottom: 20px;">
-                    Our initial automated batch ingestion workflow combined <code>yt-dlp</code>, <code>ffmpeg</code>, and a local <strong>Whisper Large V3</strong> engine.
+                    Our initial automated batch ingestion workflow combined <code>yt-dlp</code>, <code>ffmpeg</code>,
+                    and a local <strong>Whisper Large V3</strong> engine.
                 </p>
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 1.05rem; margin-bottom: 20px;">
+                <table
+                    style="width: 100%; border-collapse: collapse; text-align: left; font-size: 1.05rem; margin-bottom: 20px;">
                     <thead>
                         <tr style="border-bottom: 2px solid var(--border-color);">
-                            <th style="padding: 10px; font-family: var(--font-bold-short); width: 25%;">Pipeline Phase</th>
-                            <th style="padding: 10px; font-family: var(--font-bold-short);">Technical Execution Details</th>
+                            <th style="padding: 10px; font-family: var(--font-bold-short); width: 25%;">Pipeline Phase
+                            </th>
+                            <th style="padding: 10px; font-family: var(--font-bold-short);">Technical Execution Details
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="border-bottom: 1px solid #e0e0e0;">
                             <td style="padding: 10px; font-weight: 600;">Ingestion & Slicing</td>
-                            <td style="padding: 10px; color: var(--text-secondary);">Downloads video audio streams via <code>yt-dlp</code> and slices them into uniform 30-second segments to guard local RAM.</td>
+                            <td style="padding: 10px; color: var(--text-secondary);">Downloads video audio streams via
+                                <code>yt-dlp</code> and slices them into uniform 30-second segments to guard local RAM.
+                            </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #e0e0e0;">
                             <td style="padding: 10px; font-weight: 600;">Local Transcription</td>
-                            <td style="padding: 10px; color: var(--text-secondary);">Ingests 30s segments locally to run Whisper Large V3 ASR decoding.</td>
+                            <td style="padding: 10px; color: var(--text-secondary);">Ingests 30s segments locally to run
+                                Whisper Large V3 ASR decoding.</td>
                         </tr>
                         <tr style="border-bottom: 1px solid #e0e0e0;">
                             <td style="padding: 10px; font-weight: 600; color: #d32f2f;">Transcription Evaluation</td>
-                            <td style="padding: 10px; color: #d32f2f; font-weight: 500;"><strong>Unsatisfactory Results:</strong> Transcripts suffered from severe repeating loops and stutters (e.g. repeating words like "प्रस्तुत" and "चूला" indefinitely).</td>
+                            <td style="padding: 10px; color: #d32f2f; font-weight: 500;"><strong>Unsatisfactory
+                                    Results:</strong> Transcripts suffered from severe repeating loops and stutters
+                                (e.g. repeating words like "प्रस्तुत" and "चूला" indefinitely).</td>
                         </tr>
                     </tbody>
                 </table>
@@ -506,12 +535,16 @@
             <div class="slide-content-center">
                 <h3>Pivot to Remote Gemini API</h3>
                 <p class="slide-body-text" style="font-size: 1.25rem; margin-bottom: 15px;">
-                    To bypass local RAM crashes and Whispers repetition loops, we shifted to the remote <strong>Gemini File API</strong>.
+                    To bypass local RAM crashes and Whispers repetition loops, we shifted to the remote <strong>Gemini
+                        File API</strong>.
                 </p>
                 <div style="display: flex; gap: 30px; width: 100%; text-align: left; margin-bottom: 15px;">
                     <div style="flex: 1.2; padding: 15px; border: 2px solid var(--border-color);">
-                        <h4 style="font-family: var(--font-bold-short); font-size: 1.1rem; text-transform: uppercase; margin-bottom: 8px;">Verbatim Transcript Snippet (Gurmukhi Script)</h4>
-                        <pre class="code-snippet" style="font-size: 0.9rem; line-height: 1.4; max-height: 150px; overflow-y: auto; white-space: pre-wrap; text-align: left;">
+                        <h4
+                            style="font-family: var(--font-bold-short); font-size: 1.1rem; text-transform: uppercase; margin-bottom: 8px;">
+                            Verbatim Transcript Snippet (Gurmukhi Script)</h4>
+                        <pre class="code-snippet"
+                            style="font-size: 0.9rem; line-height: 1.4; max-height: 150px; overflow-y: auto; white-space: pre-wrap; text-align: left;">
 **ਇੰਟਰਵਿਊਅਰ:** ਵੀਰ ਜੀ, ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਜੀ।
 **ਕਿਸਾਨ:** ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਜੀ।
 **ਇੰਟਰਵਿਊਅਰ:** ਤੇ ਆਪਣਾ ਨਾਮ ਜੀ?
@@ -519,13 +552,20 @@
 **ਇੰਟਰਵਿਊਅਰ:** ਤੇ ਵੀਰ ਜੀ, ਆਪਾਂ ਕਿੰਨੀ ਕੁ ਜ਼ਮੀਨ 'ਤੇ ਖੇਤੀ ਕਰਦੇ ਹਾਂ?
 **ਕਿਸਾਨ:** 10 ਕੀਲਿਆਂ ਦੀ ਜੀ।</pre>
                     </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; border-left: 4px solid var(--accent-color); padding-left: 20px;">
-                        <h4 style="font-family: var(--font-bold-short); font-size: 1.15rem; text-transform: uppercase; margin-bottom: 6px; color: var(--text-primary);">Excellent Verbatim Results</h4>
-                        <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
-                            Successfully transcribed spoken Punjabi dialects with high precision, maintaining colloquial terms (like <em>ਕੀਲਿਆਂ</em> and <em>ਪਿੰਡ</em>) and Speaker Tags perfectly.
+                    <div
+                        style="flex: 1; display: flex; flex-direction: column; justify-content: center; border-left: 4px solid var(--accent-color); padding-left: 20px;">
+                        <h4
+                            style="font-family: var(--font-bold-short); font-size: 1.15rem; text-transform: uppercase; margin-bottom: 6px; color: var(--text-primary);">
+                            Excellent Verbatim Results</h4>
+                        <p
+                            style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
+                            Successfully transcribed spoken Punjabi dialects with high precision, maintaining colloquial
+                            terms (like <em>ਕੀਲਿਆਂ</em> and <em>ਪਿੰਡ</em>) and Speaker Tags perfectly.
                         </p>
-                        <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4;">
-                            Zero local VRAM requirements, running entirely on API endpoints via the <code>google-genai</code> SDK.
+                        <p
+                            style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.4;">
+                            Zero local VRAM requirements, running entirely on API endpoints via the
+                            <code>google-genai</code> SDK.
                         </p>
                     </div>
                 </div>
@@ -541,22 +581,26 @@
             <div class="slide-content-center">
                 <h3>Notebook 2: Building the Golden Database</h3>
                 <p class="slide-body-text" style="font-size: 1.25rem; margin-bottom: 20px;">
-                    We assumed that while initial local outputs were messy, a post-processing and cleaning notebook would establish a <strong>Golden Database</strong> for model fine-tuning.
+                    We assumed that while initial local outputs were messy, a post-processing and cleaning notebook
+                    would establish a <strong>Golden Database</strong> for model fine-tuning.
                 </p>
                 <div class="large-flow-container" style="max-width: 1000px; margin-bottom: 15px;">
                     <div class="large-flow-box" style="padding: 10px;">
                         <span class="large-flow-box-title" style="font-size: 1.05rem;">1. Parse Transcripts</span>
-                        <span class="large-flow-box-desc" style="font-size: 0.85rem;">Scans folder structures to parse raw text transcripts and match them with audio segments.</span>
+                        <span class="large-flow-box-desc" style="font-size: 0.85rem;">Scans folder structures to parse
+                            raw text transcripts and match them with audio segments.</span>
                     </div>
                     <div class="large-flow-arrow">&rarr;</div>
                     <div class="large-flow-box" style="padding: 10px;">
                         <span class="large-flow-box-title" style="font-size: 1.05rem;">2. Clean & Normalize</span>
-                        <span class="large-flow-box-desc" style="font-size: 0.85rem;">Removes stutter/word loops, expands digits to written text, and strips noise artifacts.</span>
+                        <span class="large-flow-box-desc" style="font-size: 0.85rem;">Removes stutter/word loops,
+                            expands digits to written text, and strips noise artifacts.</span>
                     </div>
                     <div class="large-flow-arrow">&rarr;</div>
                     <div class="large-flow-box" style="padding: 10px;">
                         <span class="large-flow-box-title" style="font-size: 1.05rem;">3. Compile ML Matrix</span>
-                        <span class="large-flow-box-desc" style="font-size: 0.85rem;">Exports unified training metadata manifest mapping 30s audio chunks to clean target text.</span>
+                        <span class="large-flow-box-desc" style="font-size: 0.85rem;">Exports unified training metadata
+                            manifest mapping 30s audio chunks to clean target text.</span>
                     </div>
                 </div>
             </div>
@@ -571,19 +615,29 @@
             <div class="slide-content-center">
                 <h3>Transition to Outreach STT Project</h3>
                 <p class="slide-body-text" style="font-size: 1.25rem; margin-bottom: 20px; text-align: center;">
-                    Following our Day 2 experiments on scraped YouTube content, we transitioned to the real-world agricultural recordings of the core <strong>Outreach STT</strong> project.
+                    Following our Day 2 experiments on scraped YouTube content, we transitioned to the real-world
+                    agricultural recordings of the core <strong>Outreach STT</strong> project.
                 </p>
-                <div style="display: flex; gap: 40px; width: 100%; max-width: 900px; margin-top: 10px; text-align: left;">
+                <div
+                    style="display: flex; gap: 40px; width: 100%; max-width: 900px; margin-top: 10px; text-align: left;">
                     <div style="flex: 1; border-right: 1px solid var(--border-color); padding-right: 25px;">
-                        <h4 style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 6px;">From Scraped to Field Recordings</h4>
-                        <p style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
-                            Replaced studio-recorded YouTube audio with actual field interviews containing background noise, multiple speakers, and raw accents.
+                        <h4
+                            style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 6px;">
+                            From Scraped to Field Recordings</h4>
+                        <p
+                            style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
+                            Replaced studio-recorded YouTube audio with actual field interviews containing background
+                            noise, multiple speakers, and raw accents.
                         </p>
                     </div>
                     <div style="flex: 1; padding-left: 15px;">
-                        <h4 style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 6px;">Ecosystem Scaling</h4>
-                        <p style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
-                            Applied our automated segmentation and cleaning workflows to prepare these raw field audios for high-performance Whisper-LoRA fine-tuning.
+                        <h4
+                            style="font-family: var(--font-bold-short); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 6px;">
+                            Ecosystem Scaling</h4>
+                        <p
+                            style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); line-height: 1.5;">
+                            Applied our automated segmentation and cleaning workflows to prepare these raw field audios
+                            for high-performance Whisper-LoRA fine-tuning.
                         </p>
                     </div>
                 </div>
@@ -599,24 +653,38 @@
             <div class="slide-content-center">
                 <h3>Structuring Kali's Previous Work</h3>
                 <p class="slide-body-text" style="font-size: 1.2rem; margin-bottom: 15px;">
-                    The files representing this entire Day 2 pipeline are organized under <code>outreach_stt/Kali's Previous work/</code>:
+                    The files representing this entire Day 2 pipeline are organized under
+                    <code>outreach_stt/Kali's Previous work/</code>:
                 </p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; width: 100%; max-width: 950px; font-size: 0.95rem; margin-bottom: 15px;">
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; width: 100%; max-width: 950px; font-size: 0.95rem; margin-bottom: 15px;">
                     <div style="border: 1px solid #ddd; padding: 12px;">
-                        <strong style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁 data/</strong>
-                        Contains CSV metadata manifests including <code>FINAL_ML_TRAINING_CHUNKS.csv</code> (the training pairs matrix) and <code>YT_DATASET.csv</code>.
+                        <strong
+                            style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁
+                            data/</strong>
+                        Contains CSV metadata manifests including <code>FINAL_ML_TRAINING_CHUNKS.csv</code> (the
+                        training pairs matrix) and <code>YT_DATASET.csv</code>.
                     </div>
                     <div style="border: 1px solid #ddd; padding: 12px;">
-                        <strong style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁 docs/</strong>
-                        Houses technical reports and audits like <code>QUALITY_AUDIT_REPORT.md</code> and the interactive concept pipeline presentation.
+                        <strong
+                            style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁
+                            docs/</strong>
+                        Houses technical reports and audits like <code>QUALITY_AUDIT_REPORT.md</code> and the
+                        interactive concept pipeline presentation.
                     </div>
                     <div style="border: 1px solid #ddd; padding: 12px;">
-                        <strong style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁 sample_outputs/</strong>
-                        Holds reference binary files (<code>audio.mp3</code>) and corresponding generated transcript files (<code>transcript.json</code>, <code>transcript_timestamps.txt</code>).
+                        <strong
+                            style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁
+                            sample_outputs/</strong>
+                        Holds reference binary files (<code>audio.mp3</code>) and corresponding generated transcript
+                        files (<code>transcript.json</code>, <code>transcript_timestamps.txt</code>).
                     </div>
                     <div style="border: 1px solid #ddd; padding: 12px;">
-                        <strong style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁 notebooks/</strong>
-                        Contains the runnable Google Colab notebooks (<code>YADEP.ipynb</code>, interactive utility, and cleaner notebooks).
+                        <strong
+                            style="display: block; font-family: var(--font-bold-short); text-transform: uppercase; margin-bottom: 4px; color: var(--accent-color);">📁
+                            notebooks/</strong>
+                        Contains the runnable Google Colab notebooks (<code>YADEP.ipynb</code>, interactive utility, and
+                        cleaner notebooks).
                     </div>
                 </div>
             </div>
@@ -671,4 +739,5 @@
         });
     </script>
 </body>
+
 </html>
