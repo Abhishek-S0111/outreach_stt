@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
     
     # API Keys
-    anthropic_api_key: str
+    gemini_api_key: str
     
     # Zoho WorkDrive API
     zoho_client_id: str = ""
@@ -44,9 +44,9 @@ class Settings(BaseSettings):
     translation_device: Literal["cpu", "cuda"] = "cpu"
     
     # LLM Settings
-    claude_model: str = "claude-sonnet-4.5-20250514"
-    claude_max_tokens: int = 4096
-    claude_temperature: float = 0.7
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_max_tokens: int = 4096
+    gemini_temperature: float = 0.7
     
     # API Server
     api_host: str = "0.0.0.0"
