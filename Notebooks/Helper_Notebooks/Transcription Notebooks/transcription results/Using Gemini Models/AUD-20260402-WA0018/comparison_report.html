@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemini Model Comparison Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:#f5f6f8; color:#111; font-family:'Inter',system-ui,sans-serif; font-size:14px; padding:40px 24px; }
+    .container { max-width:1200px; margin:0 auto; }
+    h1 { font-size:2.4rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:2px; }
+    .subtitle { color:#666; margin-bottom:6px; font-size:0.92rem; }
+    .meta { color:#888; margin-bottom:30px; font-size:0.82rem; }
+    h2 { font-size:1.4rem; font-weight:700; margin-top:40px; margin-bottom:14px; padding-bottom:6px; border-bottom:3px solid #000; }
+    table { width:100%; border-collapse:collapse; margin-bottom:30px; font-size:0.85rem; }
+    thead th { background:#000; color:#fff; padding:10px 12px; text-align:left; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
+    tbody td { padding:10px 12px; border-bottom:1px solid #ddd; vertical-align:middle; }
+    tbody tr:hover { background:#f0f0f0; }
+    .param-card { border:2px solid #000; padding:18px 20px; background:#fff; margin-bottom:14px; }
+    .param-card h4 { font-size:0.9rem; font-weight:700; text-transform:uppercase; letter-spacing:-0.02em; margin-bottom:4px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; margin-bottom:30px; }
+    .verdict { border:4px solid #000; padding:20px 24px; background:#fff; }
+    .verdict h3 { font-size:1rem; font-weight:700; text-transform:uppercase; letter-spacing:-0.03em; }
+    .verdict .rec { font-size:1.3rem; font-weight:800; margin:4px 0; }
+    .verdict p { color:#555; font-size:0.85rem; }
+    .verdict.best { background:#000; color:#fff; }
+    .verdict.best h3 { color:#fff; }
+    .verdict.best .rec { color:#fff; }
+    .verdict.best p { color:#ccc; }
+    footer { margin-top:40px; padding-top:16px; border-top:2px solid #ddd; font-size:0.78rem; color:#888; }
+    .failed-note { background:#fef2f2; border:2px solid #dc2626; padding:12px 16px; margin-bottom:20px; font-size:0.85rem; }
+    .failed-note h4 { color:#dc2626; font-size:0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Model Comparison Report</h1>
+<p class="subtitle">Gemini API — Punjabi Speech-to-Text Benchmarking</p>
+<p class="meta">Generated July 02, 2026 at 11:29 &bull; Audio: AUD-20260402-WA0018.m4a (883s, 14.7 min) &bull; 3 successful models out of 6 total</p>
+
+<div class="failed-note">
+<h4>⚠ Models That Failed</h4>
+<div>• <strong>Gemini 2.5 Flash-Lite</strong>: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand </div><div>• <strong>Gemini 2.5 Pro</strong>: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and </div><div>• <strong>Gemini 3.1 Pro</strong>: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-3.1-pro is not found for API version v1beta, or is not </div>
+</div>
+
+<h2>Overall Rankings</h2>
+<table>
+<thead><tr>
+<th>Rank</th><th>Model</th><th>Tier</th><th>Latency</th><th>Output Tokens</th><th>Cost/hr</th><th>Cost/Run</th><th>Words</th><th>Rep Score</th>
+</tr></thead>
+<tbody>
+
+    <tr style="background:#fffde7;font-weight:600">
+        <td style="text-align:center;font-weight:700;font-size:1.2rem">🥇</td>
+        <td style="font-weight:600">Gemini 3.1 Flash-Lite</td>
+        <td style="text-align:center">Cheapest</td>
+        <td style="text-align:center">40.4s<br><span style="font-size:0.72rem;color:#888">0.046x</span></td>
+        <td style="text-align:center">7,614</td>
+        <td style="text-align:center">$0.0214</td>
+        <td style="text-align:center">0.005262</td>
+        <td style="text-align:center">3,041</td>
+        <td style="text-align:center">0.0112</td>
+    </tr>
+    <tr>
+        <td style="text-align:center;font-weight:700;font-size:1.2rem">🥈</td>
+        <td style="font-weight:600">Gemini 3.5 Flash</td>
+        <td style="text-align:center">Frontier</td>
+        <td style="text-align:center">92.6s<br><span style="font-size:0.72rem;color:#888">0.105x</span></td>
+        <td style="text-align:center">10,241</td>
+        <td style="text-align:center">$0.1704</td>
+        <td style="text-align:center">0.041807</td>
+        <td style="text-align:center">3,569</td>
+        <td style="text-align:center">0.0140</td>
+    </tr>
+    <tr>
+        <td style="text-align:center;font-weight:700;font-size:1.2rem">🥉</td>
+        <td style="font-weight:600">Gemini 2.5 Flash</td>
+        <td style="text-align:center">Your Current</td>
+        <td style="text-align:center">74.7s<br><span style="font-size:0.72rem;color:#888">0.085x</span></td>
+        <td style="text-align:center">10,437</td>
+        <td style="text-align:center">$0.1410</td>
+        <td style="text-align:center">0.034603</td>
+        <td style="text-align:center">3,504</td>
+        <td style="text-align:center">0.0223</td>
+    </tr>
+</tbody>
+</table>
+
+<h2>Parameter Comparison</h2>
+<div class="grid">
+
+    <div class="param-card">
+        <h4>Latency ⚡</h4>
+        <p style="font-size:0.82rem;color:#555;margin-bottom:10px">Wall-clock transcription time. Lower = faster.</p>
+        <div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.1 Flash-Lite</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#2563eb;width:44%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">40.44</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#2563eb;width:100%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">92.62</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 2.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#2563eb;width:81%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">74.73</div></div></div>
+    </div>
+    <div class="param-card">
+        <h4>Cost per Hour 💰</h4>
+        <p style="font-size:0.82rem;color:#555;margin-bottom:10px">USD per hour of audio. Calculated from token usage × pricing.</p>
+        <div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.1 Flash-Lite</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#059669;width:13%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">0.0214</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#059669;width:100%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">0.1704</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 2.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#059669;width:83%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">0.141</div></div></div>
+    </div>
+    <div class="param-card">
+        <h4>Output Tokens 📝</h4>
+        <p style="font-size:0.82rem;color:#555;margin-bottom:10px">Tokens generated by the model in the transcript.</p>
+        <div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.1 Flash-Lite</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#d97706;width:73%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">7614</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#d97706;width:98%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">10241</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 2.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#d97706;width:100%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">10437</div></div></div>
+    </div>
+    <div class="param-card">
+        <h4>Word Count 📄</h4>
+        <p style="font-size:0.82rem;color:#555;margin-bottom:10px">Number of words in the output transcript.</p>
+        <div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.1 Flash-Lite</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#7c3aed;width:85%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">3041</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#7c3aed;width:100%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">3569</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 2.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#7c3aed;width:98%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">3504</div></div></div>
+    </div>
+    <div class="param-card">
+        <h4>Repetition Score 🔄</h4>
+        <p style="font-size:0.82rem;color:#555;margin-bottom:10px">Lower = less hallucination/repetition.</p>
+        <div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.1 Flash-Lite</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#dc2626;width:50%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">0.0112</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 3.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#dc2626;width:63%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">0.014</div></div></div><div style="margin:6px 0;font-size:0.9rem"><span style="font-weight:600;display:inline-block;width:180px">Gemini 2.5 Flash</span><div style="background:#eee;border-radius:3px;height:20px;width:100%"><div style="background:#dc2626;width:100%;height:20px;border-radius:3px;text-align:right;padding-right:6px;font-size:11px;line-height:20px;color:#fff;min-width:30px">0.0223</div></div></div>
+    </div>
+</div>
+
+<h2>Rankings by Parameter</h2>
+<p style="font-size:0.82rem;color:#666;margin-bottom:8px">1 = best within this group. Lower overall score = better.</p>
+<table>
+<thead><tr>
+<th>Overall</th><th>Model</th><th>Latency ⚡</th><th>Cost 💰</th><th>Tokens 📝</th><th>Words 📄</th><th>Rep 🔄</th><th>Score</th>
+</tr></thead>
+<tbody>
+
+    <tr style="background:#fffde7;font-weight:600">
+        <td style="text-align:center;font-weight:700">🥇</td>
+        <td style="font-weight:600">Gemini 3.1 Flash-Lite</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center">3</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center;font-weight:700">7</td>
+    </tr>
+    <tr>
+        <td style="text-align:center;font-weight:700">🥈</td>
+        <td style="font-weight:600">Gemini 3.5 Flash</td>
+        <td style="text-align:center">3</td>
+        <td style="text-align:center">3</td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:center;font-weight:700">11</td>
+    </tr>
+    <tr>
+        <td style="text-align:center;font-weight:700">🥉</td>
+        <td style="font-weight:600">Gemini 2.5 Flash</td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:center">3</td>
+        <td style="text-align:center">2</td>
+        <td style="text-align:center">3</td>
+        <td style="text-align:center;font-weight:700">12</td>
+    </tr>
+</tbody>
+</table>
+
+<h2>Verdict</h2>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">
+    <div class="verdict best">
+        <h3>🏆 Best Overall</h3>
+        <p class="rec">Gemini 3.1 Flash-Lite</p>
+        <p>Best balance of speed, cost, and output quality.</p>
+    </div>
+    <div class="verdict">
+        <h3>⚡ Fastest</h3>
+        <p class="rec">Gemini 3.1 Flash-Lite</p>
+        <p>40.4s total &bull; 0.046x real-time factor</p>
+    </div>
+    <div class="verdict">
+        <h3>💰 Cheapest</h3>
+        <p class="rec">Gemini 3.1 Flash-Lite</p>
+        <p>$0.0214/hr &bull; $0.005262 total cost</p>
+    </div>
+    <div class="verdict">
+        <h3>📝 Most Detailed</h3>
+        <p class="rec">Gemini 2.5 Flash</p>
+        <p>10,437 output tokens &bull; 3,504 words</p>
+    </div>
+</div>
+
+<h2>Transcript Comparison</h2>
+
+    <div style="margin-bottom:20px">
+        <h4 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">🥇 Gemini 3.1 Flash-Lite</h4>
+        <div style="border:2px solid #000;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.4;max-height:250px;overflow-y:auto;background:#fafafa;white-space:pre-wrap">[00:00] ਹਾਂ ਜੀ ਸਤਿ ਸ਼੍ਰੀ ਅਕਾਲ ਜੀ। ਮੇਰਾ ਨਾਮ ਅੰਮ੍ਰਿਤਪ੍ਰੀਤ ਸਿੰਘ ਹੈ ਜੀ। ਪਿੰਡ ਮੇਰਾ ਮਨਸੂਹਾ ਕਲਾ ਹੈ ਜੀ, ਤੇ ਪਿੰਡ ਮੇਰਾ ਮਨਸੂਹਾ ਕਲਾ ਹੈ ਜੀ।
+[00:07] ਮਨਸੂਹਾ।
+[00:08] ਮਨਸੂਹਾ?
+[00:08] ਹਾਂ ਜੀ, ਤੇ ਮੈਂ ਰੋਪੜ ਜੋਬ ਅੱਛਾ ਜੀ।
+[00:15] ਅੱਛਾ ਅੱਛਾ ਜੀ।
+[00:16] ਤੇ ਮੈਂ ਜੀ ਰੋਪੜ ਆਈ ਆਈ ਟੀ ਵਿੱਚ ਜੋਬ ਕਰਦਾ ਜੀ। ਸਾਡਾ ਆਈ ਆਈ ਟੀ ਵਿੱਚ ਡਿਪਾਰਟਮੈਂਟ ਹੈ ਜੀ ਅਨਮ ਡਾਟ ਏ ਆਈ। ਠੀਕ ਹੈ ਜੀ? ਅਨਮ ਇੱਕ ਆਪਣਾ ਸੰਸਕ੍ਰਿਤ ਭਾਸ਼ਾ ਦਾ ਵਰਡ ਹੈ। ਜਿਵੇਂ ਕਿ ਅੰਨ, ਭੋਜਨ ਜੋ ਅਸੀਂ ਖਾਂਦੇ ਹਾਂ ਜੀ, ਠੀਕ ਹੈ ਜੀ, ਏ ਆਈ ਜਿਹੜੀ ਹੁਣ ਟੈਕਨੋਲੋਜੀ ਚੱਲ ਰਹੀ ਹੈ। ਠੀਕ ਹੈ ਜੀ, ਸਾਡੇ ਕੋਲ ਟੈਕਨੋਲੋਜੀ ਹੈ, ਤੁਹਾਡੇ ਕੋਲ ਖੇਤੀਬਾੜੀ ਦਾ ਤਜਰਬਾ, ਇਹਨਾਂ ਦੋਵਾਂ ਨੂੰ ਜੋੜ ਕੇ ਜੀ ਆਪਾਂ ਇੱਕ ਐਪ ਤਿਆਰ ਕਰ ਰਹੇ ਹਾਂ ਜਿਸ ਦਾ ਨਾਮ ਹੈ ਅਜਰ ਸਖਾ...</div>
+    </div>
+    <div style="margin-bottom:20px">
+        <h4 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">🥈 Gemini 3.5 Flash</h4>
+        <div style="border:2px solid #000;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.4;max-height:250px;overflow-y:auto;background:#fafafa;white-space:pre-wrap">[00:00] - SPEAKER_00: ਹਾਂਜੀ ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਜੀ। ਮੇਰਾ ਨਾਮ ਅੰਮ੍ਰਿਤਪ੍ਰੀਤ ਸਿੰਘ ਹੈ ਜੀ। ਪਿੰਡ ਮੇਰਾ ਮਨਸੂਹਾ ਕਲਾਂ ਹੈ ਜੀ। ਤੇ ਪਿੰਡ ਮੇਰਾ ਮਨਸੂਹਾ ਕਲਾਂ ਹੈ ਜੀ, ਮਨਸੂਹਾ।
+[00:08] - SPEAKER_01: ਮਨਸੂਹਾ?
+[00:08] - SPEAKER_00: ਹਾਂਜੀ।
+[00:09] - SPEAKER_01: ਅੱਛਾ ਜੀ।
+[00:09] - SPEAKER_00: ਤੇ ਮੈਂ ਰੋਪੜ...
+[00:13] - SPEAKER_00: ਅੱਛਾ ਜੀ।
+[00:15] - SPEAKER_01: ਅੱਛਾ ਅੱਛਾ ਜੀ।
+[00:17] - SPEAKER_00: ਤੇ ਮੈਂ ਜੀ ਰੋਪੜ ਆਈਆਈਟੀ 'ਚ ਜੌਬ ਕਰਦਾ ਜੀ। ਸਾਡਾ ਆਈਆਈਟੀ 'ਚ ਡਿਪਾਰਟਮੈਂਟ ਹੈ ਜੀ ਅਨਮ ਡੋਟ ਏਆਈ। ਠੀਕ ਹੈ ਜੀ। ਅਨਮ ਇੱਕ ਆਪਣਾ ਸੰਸਕ੍ਰਿਤ ਭਾਸ਼ਾ ਦਾ ਵਰਡ ਹੈ ਜਿਵੇਂ ਕਿ ਅੰਨ ਭੋਜਨ ਜੋ ਅਸੀਂ ਖਾਂਦੇ ਹਾਂ ਜੀ। ਠੀਕ ਹੈ ਜੀ, ਏਆਈ ਜਿਹੜੀ ਹੁਣ ਟੈਕਨੋਲੋਜੀ ਚੱਲ ਰਹੀ ਹੈ। ਠੀਕ ਹੈ ਜੀ। ਸਾਡੇ ...</div>
+    </div>
+    <div style="margin-bottom:20px">
+        <h4 style="font-size:0.95rem;font-weight:700;margin-bottom:4px">🥉 Gemini 2.5 Flash</h4>
+        <div style="border:2px solid #000;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.4;max-height:250px;overflow-y:auto;background:#fafafa;white-space:pre-wrap">[00:00] SPEAKER_00: ਹਾਂਜੀ ਸਤਿ ਸ਼੍ਰੀ ਅਕਾਲ ਜੀ। ਮੇਰਾ ਨਾਮ ਅੰਮ੍ਰਿਤਪ੍ਰੀਤ ਸਿੰਘ ਆ ਜੀ। ਪਿੰਡ ਮੇਰਾ ਮਨਸੂਹਾ ਕਲਾਂ ਜੀ। ਤੇ ਪਿੰਡ ਮੇਰਾ ਮਨਸੂਹਾ ਕਲਾਂ ਜੀ।
+[00:00] SPEAKER_00: ਮਨਸੂਹਾ।
+[00:01] SPEAKER_01: ਮਨਸੂਹਾ।
+[00:02] SPEAKER_00: ਹਾਂਜੀ।
+[00:02] SPEAKER_01: ਠੀਕ ਆ।
+[00:02] SPEAKER_00: ਤੇ ਮੈਂ ਰੋਪੜ
+[00:02] SPEAKER_01: ਅੰਮ੍ਰਿਤਸਰ ਤੋਂ ਆਏ ਆਂ।
+[00:03] SPEAKER_00: ਅੱਛਾ ਜੀ। ਅੱਛਾ ਅੱਛਾ ਜੀ।
+[00:03] SPEAKER_01: ਰੋਪੜ ਤੋਂ ਆਏ ਹੋ।
+[00:03] SPEAKER_00: ਤੇ ਮੈਂ ਜੀ ਰੋਪੜ ਆਈਆਈਟੀ 'ਚ ਜੋਬ ਕਰਦਾ ਜੀ। ਸਾਡਾ ਆਈਆਈਟੀ 'ਚ ਡਿਪਾਰਟਮੈਂਟ ਆ ਜੀ ਅਨਮ ਡੋਟ ਏਆਈ। ਠੀਕ ਆ ਜੀ ਅਨਮ ਇੱਕ ਆਪਣਾ ਸੰਸਕ੍ਰਿਤ ਭਾਸ਼ਾ ਦਾ ਵਰਡ ਐ ਜਿਵੇਂ ਕਿ ਅਨ ਭੋਜਨ ਜੋ ਅਸੀਂ ਖਾਂਦੇ ਆਂ ਜੀ।
+[00:03] SPEAKER_01:...</div>
+    </div>
+
+<footer>
+<p>Generated by Comparison Report Script. Data from /Users/mybook/Downloads/SOPHOMORE/GIT/outreach_stt/Notebooks/Helper_Notebooks/Transcription Notebooks/transcription results/Using Gemini Models/AUD-20260402-WA0018/AUD-20260402-WA0018_benchmark_full.json</p>
+</footer>
+</div>
+</body>
+</html>
