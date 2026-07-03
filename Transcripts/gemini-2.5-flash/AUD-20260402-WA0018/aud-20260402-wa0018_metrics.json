@@ -1,0 +1,22 @@
+{
+  "model_name": "Gemini 2.5 Flash",
+  "model_id": "gemini-2.5-flash",
+  "generation": "2.5",
+  "tier": "Your Current",
+  "latency_sec": 74.73,
+  "rtf": 0.085,
+  "lat_per_min": 5.08,
+  "in_tokens": 28367,
+  "out_tokens": 10437,
+  "total_tokens": 45447,
+  "cost_run_usd": 0.034603,
+  "cost_hr_usd": 0.141,
+  "rep_score": 0.0223,
+  "word_count": 3504,
+  "char_count": 18676,
+  "wer": null,
+  "cer": null,
+  "audio_file": "AUD-20260402-WA0018.m4a",
+  "duration_sec": 883.3,
+  "error": null
+}
