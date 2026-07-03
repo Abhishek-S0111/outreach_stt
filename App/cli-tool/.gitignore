@@ -1,0 +1,114 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data Files (DO NOT COMMIT)
+data/
+*.mp3
+*.mp4
+*.m4a
+*.wav
+*.avi
+*.mov
+*.mkv
+*.flac
+*.aac
+
+# Generated Reports (DO NOT COMMIT)
+*.pdf
+*.xlsx
+*.docx
+reports/
+
+# Logs (DO NOT COMMIT)
+logs/
+*.log
+
+# Temporary Files
+temp/
+tmp/
+*.tmp
+.cache/
+
+# MongoDB dumps
+dump/
+*.bson
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Model files (large files)
+*.pt
+*.pth
+*.bin
+*.onnx
+*.h5
+*.pkl
+*.pickle
+
+# System files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# API Keys and Secrets (CRITICAL - DO NOT COMMIT)
+secrets/
+credentials/
+*.key
+*.pem
+*.crt
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Documentation build
+docs/_build/
+site/
+
+# Assets (keep fonts, exclude large media)
+assets/media/
+assets/videos/
+assets/images/*.jpg
+assets/images/*.png
+assets/images/*.gif
+
+# Keep these files (exceptions)
+!assets/fonts/
+!.env.example
+!README.md
+!requirements.txt
