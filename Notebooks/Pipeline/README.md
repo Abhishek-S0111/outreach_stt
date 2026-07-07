@@ -24,8 +24,8 @@ graph TD
         C1 -->|Cluster Speaker Embeddings| C2[Raw Timeline JSON]
     end
 
-    subgraph Refinement [4. Timeline Merging & Serialization]
-        C2 -->|Merge Silence Gaps < 1.5s| D1[Refined Timeline]
+    subgraph Refinement [4. Merging Speaker Turns & Serialization]
+        C2 -->|Merge Silence Gaps < 1.5s| D1[Merged Timeline]
         D1 -->|Calculate Participation Stats| D2[Multi-Format Timelines CSV/RTTM/TXT]
         D1 -->|Generate Markdown Report| D3[Diarized MD Report]
     end
@@ -69,8 +69,17 @@ This directory contains the final integrated pipeline which automates:
 
 ```
 Notebooks/Pipeline/
-├── pipeline.ipynb  # Local GPU Whisper-LoRA + Gemini Insights Pipeline
-└── README.md       # This file
+├── backup_fallback_strategies.md  # Detailed step-by-step backup and fallback options
+├── fallbacks pipeline/            # Local folder for fallback transcription reports
+│   ├── diarization/
+│   ├── merging speaker turns/
+│   ├── separation/
+│   ├── splitting/
+│   ├── transcription/
+│   └── README.md
+├── pipeline.ipynb                 # Local GPU Whisper-LoRA + Gemini Insights Pipeline
+├── fallbacks_pipeline.ipynb       # Transcription Fallback Pipeline
+└── README.md                      # This file
 ```
 
 ---

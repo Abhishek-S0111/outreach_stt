@@ -1,0 +1,22 @@
+{
+  "model_name": "Gemini 3.1 Flash-Lite",
+  "model_id": "gemini-3.1-flash-lite",
+  "generation": "3.1",
+  "tier": "Cheapest",
+  "latency_sec": 40.44,
+  "rtf": 0.046,
+  "lat_per_min": 2.75,
+  "in_tokens": 22168,
+  "out_tokens": 7614,
+  "total_tokens": 29782,
+  "cost_run_usd": 0.005262,
+  "cost_hr_usd": 0.0214,
+  "rep_score": 0.0112,
+  "word_count": 3041,
+  "char_count": 14152,
+  "wer": null,
+  "cer": null,
+  "audio_file": "AUD-20260402-WA0018.m4a",
+  "duration_sec": 883.3,
+  "error": null
+}
