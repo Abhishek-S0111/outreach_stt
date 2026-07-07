@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     translation_model: str = "ai4bharat/indictrans2-en-indic-1B"
     translation_device: Literal["cpu", "cuda"] = "cpu"
     
+    # Diarization Settings
+    hf_token: Optional[str] = None
+    diarization_model: str = "pyannote/speaker-diarization-community-1"
+    
     # LLM Settings
     gemini_model: str = "gemini-2.5-flash"
     gemini_max_tokens: int = 4096

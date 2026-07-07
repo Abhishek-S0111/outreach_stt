@@ -15,6 +15,9 @@ import soundfile as sf
 import librosa
 import json
 import os
+import numpy as np
+from pyannote.audio import Pipeline
+from pyannote.audio.pipelines.utils.hook import ProgressHook
 
 # --- Part 1: Audio Extractor ---
 
@@ -82,137 +85,134 @@ class AudioExtractor:
         return output_path
 
 
-    """
-        We need modules for noise suppresion.
-    """
+# --- Part 1.5: Audio Preprocessing ---
+
+class AudioPreProcessing:
+    """Pre-process audio files: noise suppression and speaker diarization"""
+    
+    def __init__(self):
+        self.diarization_pipeline = None
+        self.diarization_loaded = False
 
     @staticmethod
-    async def load_audio(video_path:Path) -> list:
-        import os
-        if not os.path.exists(video_path):
-            raise FileNotFoundError(f"Invalid Video Path: {video_path}\n ")
+    def load_audio(audio_path: Path) -> List[Any]:
+        """Load audio file using librosa"""
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Invalid Audio Path: {audio_path}")
         
         try:
-            y, sr = librosa.load(video_path, sr=None)
+            y, sr = librosa.load(audio_path, sr=None)
+            return [y, sr]
         except Exception as e:
-            print(f"Following error was encountered while loading the file.: {e}")
-
-        return [y,sr]
+            log.error(f"Error loading audio file: {e}")
+            raise
 
     @staticmethod
-    async def noise_suppresion(video_path: Path) -> list:
-        aud = AudioExtractor.load_audio(video_path)
+    def noise_suppression(audio_path: Path, output_path: Optional[Path] = None) -> Path:
+        """Apply non-stationary noise reduction to audio file"""
+        log.info(f"Applying noise suppression to {audio_path.name}")
+        aud = AudioPreProcessing.load_audio(audio_path)
         y = aud[0]
         sr = aud[1]
 
         try:
             y_denoised = nr.reduce_noise(y=y, sr=sr, stationary=False, prop_decrease=0.85)
         except Exception as e:
-            print(f"The following error was encountered: {e}")
+            log.error(f"Noise reduction failed: {e}")
+            raise
 
-        output_path = video_path
-        sf.write(output_path, y_denoised, sr)
+        target_path = output_path or audio_path
+        sf.write(target_path, y_denoised, sr)
+        log.info(f"Noise suppression complete. Saved to: {target_path}")
+        return target_path
 
-    # """
-    #     Audio Splits
-    # """
-    # #Source currently undecided 
+    # Keep compatibility with original method spelling
+    @staticmethod
+    def noise_suppresion(audio_path: Path, output_path: Optional[Path] = None) -> Path:
+        return AudioPreProcessing.noise_suppression(audio_path, output_path)
 
-
-
-    # @staticmethod
-    # async def audio_splitting(audio_path:Path, refined_timeline_json_path: Path):
-    #     audio_path = ""
-    #     refined_timeline_json_path = ""
-    #     isolated_output_folder = ""
-
-    #     isolate_speaker_wise = True # @param {type:"boolean"}
-    #     export_individual_turns = True # @param {type:"boolean"}
-
-    #     if not os.path.exists(audio_path):
-    #         print(f"[ERROR] Cleaned audio not found at: '{audio_path}'")
-    #     elif not os.path.exists(refined_timeline_json_path):
-    #         print(f"[ERROR] Refined timeline JSON not found at: '{refined_timeline_json_path}'")
-    #     else:
-    #         audio_filename = os.path.basename(audio_path)
-    #         audio_name_only = audio_filename.replace("_cleaned.wav", "").replace(".wav", "")
-    #         os.makedirs(isolated_output_folder, exist_ok=True)
-    #         print(f"[SUCCESS] Validated paths. Isolated audio tracks will be saved in: {isolated_output_folder}")
-
-    #     #1. Load refined timeline
-    #     with open(refined_timeline_json_path, "r", encoding="utf-8") as f:
-    #         speaker_segments = json.load(f)
+    def load_diarization_model(self, hf_token: Optional[str] = None):
+        """Lazy load Pyannote Speaker Diarization Pipeline"""
+        if not self.diarization_loaded:
+            token = hf_token or getattr(settings, "hf_token", None) or os.getenv("HF_TOKEN")
+            if not token:
+                log.warning("Hugging Face Access Token (HF_TOKEN) is not configured. Pyannote model download/auth may fail.")
             
-    #     #Create specific folder for output files
-    #     specific_isolated_folder = os.path.join(isolated_output_folder, audio_name_only)
-    #     os.makedirs(specific_isolated_folder, exist_ok=True)
+            model_name = getattr(settings, "diarization_model", "pyannote/speaker-diarization-community-1")
+            log.info(f"Initializing Pyannote Speaker Diarization Pipeline ({model_name})...")
+            
+            try:
+                self.diarization_pipeline = Pipeline.from_pretrained(
+                    model_name,
+                    token=token
+                )
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                self.diarization_pipeline.to(device)
+                self.diarization_loaded = True
+                log.info(f"Diarization pipeline loaded successfully on {device}.")
+            except Exception as e:
+                log.error(f"Failed to load Pyannote pipeline: {e}")
+                raise
+
+    async def diarize(
+        self,
+        audio_path: Path,
+        hf_token: Optional[str] = None,
+        num_speakers: int = 0,
+        min_speakers: int = 0,
+        max_speakers: int = 0,
+        output_json_path: Optional[Path] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Run speaker diarization on audio file.
+        Returns a list of segments with start time, end time, and speaker label.
+        Optionally saves segments to output_json_path.
+        """
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Audio file not found: {audio_path}")
         
-    #     #Load cleaned audio file
-    #     print(f"Loading cleaned audio file for splitting: '{audio_path}'")
-    #     y, sr = librosa.load(audio_path, sr=16000, mono=True)
+        self.load_diarization_model(hf_token=hf_token)
         
-    #     #Dictionary to hold samples for concatenating speaker-wise
-    #     speaker_audio_data = {}
+        log.info(f"Running Speaker Diarization on {audio_path.name}")
         
-    #     #Time formatting helper for filenames: convert seconds to [MM-SS.d]
-    #     def format_time_filename(seconds):
-    #         hours = int(seconds // 3600)
-    #         minutes = int((seconds % 3600) // 60)
-    #         secs = int(seconds % 60)
-    #         millis = int((seconds - int(seconds)) * 10)
-    #         if hours > 0:
-    #             return f"{hours:02d}-{minutes:02d}-{secs:02d}.{millis:01d}"
-    #         else:
-    #             return f"{minutes:02d}-{secs:02d}.{millis:01d}"
-                
-    #     #1. Process and extract segments
-    #     for idx, entry in enumerate(speaker_segments):
-    #         start_sec = entry['start']
-    #         end_sec = entry['end']
-    #         speaker = entry['speaker']
-            
-    #         # Calculate sample indices
-    #         start_sample = int(start_sec * sr)
-    #         end_sample = int(end_sec * sr)
-            
-    #         # Slice the audio array
-    #         chunk = y[start_sample:end_sample]
-            
-    #         # Accumulate for speaker-wise isolation
-    #         if speaker not in speaker_audio_data:
-    #             speaker_audio_data[speaker] = []
-    #         speaker_audio_data[speaker].append(chunk)
-            
-    #         # If user wants individual turns exported
-    #         if export_individual_turns:
-    #             turns_folder = os.path.join(specific_isolated_folder, "individual_turns", speaker)
-    #             os.makedirs(turns_folder, exist_ok=True)
-                
-    #             start_str = format_time_filename(start_sec)
-    #             end_str = format_time_filename(end_sec)
-    #             turn_filename = f"{audio_name_only}_{speaker}_turn_{idx+1:03d}_{start_str}_to_{end_str}.wav"
-    #             turn_filepath = os.path.join(turns_folder, turn_filename)
-    #             sf.write(turn_filepath, chunk, sr)
-                
-    #     # 2. Export speaker-wise concatenated audio
-    #     if isolate_speaker_wise:
-    #         print("\n--- Exporting Concatenated Speaker-Wise Audio ---")
-    #         for speaker, chunks in speaker_audio_data.items():
-    #             if chunks:
-    #                 # Concatenate all chunks for this speaker
-    #                 concatenated_audio = np.concatenate(chunks)
-    #                 speaker_filename = f"{audio_name_only}_{speaker}_isolated.wav"
-    #                 speaker_filepath = os.path.join(specific_isolated_folder, speaker_filename)
-    #                 sf.write(speaker_filepath, concatenated_audio, sr)
-    #                 print(f"[SUCCESS] Exported isolated audio for {speaker} to '{speaker_filepath}'")
-                    
-    #     print(f"\n[SUCCESS] Audio splitting and speaker isolation complete! Output saved in: '{specific_isolated_folder}'")
-     
-"""
-Audio Must be splitted based on the speakers speaking at the moment
-"""
+        # Setup pipeline params
+        diarization_params = {}
+        if num_speakers > 0:
+            diarization_params["num_speakers"] = num_speakers
+        else:
+            if min_speakers > 0:
+                diarization_params["min_speakers"] = min_speakers
+            if max_speakers > 0:
+                diarization_params["max_speakers"] = max_speakers
 
+        try:
+            with ProgressHook() as hook:
+                diarization_output = self.diarization_pipeline(str(audio_path), hook=hook, **diarization_params)
 
+            # Extract speaker segments
+            raw_speaker_segments = []
+            for turn, speaker in diarization_output.speaker_diarization:
+                raw_speaker_segments.append({
+                    "start": turn.start,
+                    "end": turn.end,
+                    "speaker": speaker
+                })
+
+            log.info(f"Diarization complete. Identified {len(set(s['speaker'] for s in raw_speaker_segments))} unique speaker(s).")
+
+            # Save raw segments to JSON file if path is provided
+            if output_json_path:
+                output_json_path = Path(output_json_path)
+                output_json_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(output_json_path, "w", encoding="utf-8") as f:
+                    json.dump(raw_speaker_segments, f, indent=4, ensure_ascii=False)
+                log.info(f"Raw speaker timeline exported to: '{output_json_path}'")
+
+            return raw_speaker_segments
+
+        except Exception as e:
+            log.error(f"Diarization failed: {e}")
+            raise
 
 
 # --- Part 2: Transcription Service ---
@@ -320,5 +320,6 @@ class TranslationService:
 
 # Global Instances
 audio_extractor = AudioExtractor()
+audio_preprocessing = AudioPreProcessing()
 transcription_service = TranscriptionService()
 translation_service = TranslationService()
