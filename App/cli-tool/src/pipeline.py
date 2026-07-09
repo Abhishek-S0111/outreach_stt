@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from datetime import datetime
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 
 from config import settings
 from src.core.utils import log, FileValidator, MetadataValidator
