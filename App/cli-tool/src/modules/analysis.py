@@ -4,7 +4,8 @@ Handles LLM-based analysis (Claude) and Participant Extraction
 """
 from typing import Dict, List, Optional, Any
 import json
-from anthropic import Anthropic
+from google import genai
+from google.genai import types
 from config import settings
 from src.core.utils import log
 
@@ -82,7 +83,7 @@ class ParticipantParser:
         # Extract from transcript using LLM if names missing
         if transcript and not participant_info["farmer_names"]:
             try:
-                client = Anthropic(api_key=settings.anthropic_api_key)
+                client = genai.Client(api_key=settings.gemini_api_key)
                 prompt = f"""Analyze the following transcript of a rural village meeting and extract the names of all farmers or participants who spoke or were mentioned.
                 
                 Transcript:
@@ -98,12 +99,16 @@ class ParticipantParser:
                 
                 JSON:"""
                 
-                response = client.messages.create(
-                    model=settings.claude_model, max_tokens=1024, temperature=0.0,
-                    messages=[{"role": "user", "content": prompt}]
+                response = client.models.generate_content(
+                    model=settings.gemini_model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        max_output_tokens=1024,
+                        temperature=0.0
+                    )
                 )
                 
-                text = response.content[0].text.strip().replace('```json', '').replace('```', '')
+                text = response.text.strip().replace('```json', '').replace('```', '')
                 try:
                     names = json.loads(text)
                 except:
@@ -135,10 +140,10 @@ class ParticipantParser:
         return categories
 
 class LLMAnalyzer:
-    """Analyze transcripts using Claude LLM"""
+    """Analyze transcripts using Gemini API"""
     
     def __init__(self):
-        self.client = Anthropic(api_key=settings.anthropic_api_key)
+        self.client = genai.Client(api_key=settings.gemini_api_key)
     
     async def analyze_full_interaction(self, transcript: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
         log.info("Performing full interaction analysis")
@@ -180,7 +185,7 @@ class LLMAnalyzer:
 
         Transcript: {transcript[:25000]}"""
         
-        response_text = await self._call_claude(prompt)
+        response_text = await self._call_gemini(prompt)
         try:
             # Clean markdown code blocks
             clean_text = response_text.replace("```json", "").replace("```", "").strip()
@@ -205,7 +210,7 @@ class LLMAnalyzer:
         2. Format as a numbered list.
         
         Transcript: {transcript[:25000]}"""
-        text = await self._call_claude(prompt)
+        text = await self._call_gemini(prompt)
         return self._parse_list(text)
 
     async def extract_questions(self, transcript: str) -> List[str]:
@@ -218,7 +223,7 @@ class LLMAnalyzer:
         Return them as a numbered list of ONLY the Agricultural questions.
         
         Transcript: {transcript[:25000]}"""
-        text = await self._call_claude(prompt)
+        text = await self._call_gemini(prompt)
         return self._parse_list(text)
 
     async def extract_rich_metadata(self, transcript: str, current_meta: Dict[str, Any]) -> Dict[str, Any]:
@@ -245,7 +250,7 @@ class LLMAnalyzer:
         Transcript: {transcript[:15000]}"""
         
         try:
-            res = await self._call_claude(prompt)
+            res = await self._call_gemini(prompt)
             clean = res.replace("```json", "").replace("```", "").strip()
             start = clean.find('{')
             end = clean.rfind('}') + 1
@@ -297,7 +302,7 @@ class LLMAnalyzer:
         Transcript: {transcript[:20000]}"""
         
         try:
-            res = await self._call_claude(prompt)
+            res = await self._call_gemini(prompt)
             clean = res.replace("```json", "").replace("```", "").strip()
             start = clean.find('[')
             end = clean.rfind(']') + 1
@@ -335,20 +340,24 @@ Farmer Questions:
 Write a professional, concise conclusion focusing on practical outcomes and recommendations. Use simple, clear language."""
         
         try:
-            conclusion = await self._call_claude(prompt, max_tokens=1024)
+            conclusion = await self._call_gemini(prompt, max_tokens=1024)
             return conclusion.strip()
         except Exception as e:
             log.error(f"Conclusion generation failed: {e}")
             return "Summary generation failed."
 
 
-    async def _call_claude(self, prompt: str, max_tokens: int = 2048) -> str:
+    async def _call_gemini(self, prompt: str, max_tokens: int = 2048) -> str:
         try:
-            response = self.client.messages.create(
-                model=settings.claude_model, max_tokens=max_tokens, temperature=0.3,
-                messages=[{"role": "user", "content": prompt}]
+            response = self.client.models.generate_content(
+                model=settings.gemini_model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=0.3
+                )
             )
-            return response.content[0].text.strip()
+            return response.text.strip()
         except Exception as e:
             log.error(f"LLM Call failed: {e}")
             return ""

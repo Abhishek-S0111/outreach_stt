@@ -37,11 +37,15 @@ graph TD
         E1 -->|Save individual sequence chunks| E3[Individual Turn WAVs]
     end
 
-    subgraph Transcription [Step 6: Local Whisper-LoRA & Gemini Insights]
-        E1 -->|Spectrogram Extraction| F1[Local Whisper Model]
-        F1 -->|Overlay Gurmukhi LoRA Adapter| F2[Local Gurmukhi STT]
-        F2 -->|Generate Chronological Transcript| F3[Punjabi Transcript JSON]
-        F3 -->|Gemini Transliterator & Analyst| F4[Devanagari Transliteration & Insights MD]
+    subgraph Transcription [Step 6: Transcription & Insights]
+        E1 -->|Spectrogram| F1[Local Whisper Model]
+        F1 -->|Overlay Gurmukhi LoRA| F2[Local Gurmukhi STT]
+        F2 -->|Generate Transcript| F3[Transcript JSON]
+        F3 -->|Gemini API Transliterator| F4[Devanagari & Insights MD]
+        
+        E1 -->|Multimodal Audio| G1[Local Gemma 3n Model]
+        G1 -->|Local Gurmukhi STT| G2[Transcript JSON]
+        G2 -->|Local Gemma Prompts| G3[Devanagari & Insights MD]
     end
 ```
 
@@ -58,7 +62,8 @@ The table below outlines the exact files consumed and produced by each modular s
 | [**03 Diarization**](#3-speaker-diarization) | `Cleaned_Audio/` (e.g., `MarauliKhurad1_cleaned.wav`) | `Diarization_Outputs/` (e.g., `MarauliKhurad1_raw_timeline.json`) |
 | [**04 Refinement**](#4-timeline-refinement--multi-format-serialization) | `Diarization_Outputs/` (e.g., `MarauliKhurad1_raw_timeline.json`) | `Diarization_Outputs/MarauliKhurad1/` (e.g., CSV, JSON, TXT, RTTM, MD reports) |
 | [**05 Audio Splitting**](#5-audio-splitting--speaker-isolation) | `Cleaned_Audio/` + `Diarization_Outputs/MarauliKhurad1/` | `Isolated_Speaker_Audio/MarauliKhurad1/` (e.g., speaker-concatenated tracks & individual turns) |
-| [**06 Transcription**](#6-speaker-wise-transcription-local-whisper-lora--insights-extraction-gemini-api) | `Cleaned_Audio/` + `Diarization_Outputs/MarauliKhurad1/` | `Diarization_Transcripts/MarauliKhurad1/` (e.g., Gurmukhi transcripts, speaker text, Devanagari reports) |
+| [**06a Transcription (Whisper-LoRA)**](#6a-speaker-wise-transcription-local-whisper-lora--insights-extraction-gemini-api) | `Cleaned_Audio/` + `Diarization_Outputs/MarauliKhurad1/` | `Diarization_Transcripts/MarauliKhurad1/` (Whisper-LoRA transcripts & Gemini reports) |
+| [**06b Transcription (Gemma-3n)**](#6b-speaker-wise-transcription--insights-extraction-local-gemma-3n) | `Cleaned_Audio/` + `Diarization_Outputs/MarauliKhurad1/` | `Diarization_Transcripts/MarauliKhurad1/` (Gemma-3n transcripts & local Gemma reports) |
 
 ---
 
@@ -172,9 +177,9 @@ Ensure the subdirectories below exist (the notebooks will attempt to create them
 
 ---
 
-### 6. Speaker-Wise Transcription (Local Whisper-LoRA) & Insights Extraction (Gemini API)
-* **Notebook File**: [06_Whisper_Lora_Transcription_and_Gemini_Insights.ipynb](06_Whisper_Lora_Transcription_and_Gemini_Insights.ipynb)
-* **Goal**: Transcribe each speaker segment locally on GPU using fine-tuned models, and query the Gemini API to transliterate the text and extract downstream insights.
+### 6a. Speaker-Wise Transcription (Local Whisper-LoRA) & Insights Extraction (Gemini API)
+* **Notebook File**: [06a_Whisper_Lora_Transcription_and_Gemini_Insights.ipynb](06a_Whisper_Lora_Transcription_and_Gemini_Insights.ipynb)
+* **Goal**: Transcribe speaker segments locally on GPU using fine-tuned Whisper-LoRA adapters, and query the Gemini API to transliterate the text and extract downstream insights.
 * **Form Parameters**:
   * `cleaned_audio_path`: Path to `Cleaned_Audio/[Filename]_cleaned.wav`.
   * `refined_timeline_json_path`: Path to the refined JSON timeline.
@@ -196,6 +201,33 @@ Ensure the subdirectories below exist (the notebooks will attempt to create them
     2. Prepares a detailed prompt instructing the model to translate/transliterate the Gurmukhi script into Hindi-readable Devanagari script (keeping speaker labels and timestamps intact) and extract key takeaways, issues/action items, and a structured markdown dictionary table explaining local terms.
     3. Saves the generated summary as `_devanagari_insights.md`.
 * **Input**: `Cleaned_Audio/[Filename]_cleaned.wav`, `Diarization_Outputs/[Filename]/[Filename]_timeline.json`, and a Gemini API Key.
+* **Output**: Saved inside `Diarization_Transcripts/[Filename]/`:
+  - Chronological transcripts (`_diarized_transcript.txt` / `.md` / `.json`)
+  - Speaker segregated texts (`_[Speaker]_transcript.txt`)
+  - Devanagari transliteration and insights report (`_devanagari_insights.md`)
+
+---
+
+### 6b. Speaker-Wise Transcription & Insights Extraction (Local Gemma-3n)
+* **Notebook File**: [06b_Gemma_Transcription_and_Insights.ipynb](06b_Gemma_Transcription_and_Insights.ipynb)
+* **Goal**: Transcribe speaker segments locally on GPU using the multimodal Gemma 3n E4B model, and run the same local model to generate Devanagari transliteration and insights, creating a completely offline pipeline.
+* **Form Parameters**:
+  * `cleaned_audio_path`: Path to `Cleaned_Audio/[Filename]_cleaned.wav`.
+  * `refined_timeline_json_path`: Path to the refined JSON timeline.
+  * `transcription_output_folder`: Folder path where transcripts and reports are saved.
+  * `gemma_model_id`: The Gemma model version (defaults to `google/gemma-3n-e4b-it`).
+  * `run_insights`: If `True`, runs the local Gemma insights generation block.
+* **Underlying Logic & Libraries**:
+  * **Local Gemma-3n STT**:
+    1. Loads the Gemma 3n model onto the GPU in bfloat16 precision.
+    2. Slices speaker audio turns from the cleaned WAV file.
+    3. Passes the audio array slice directly to Gemma's multimodal processor, applying a specific ASR chat template instruction.
+    4. Decodes output token IDs using `processor.decode` to produce Gurmukhi Punjabi transcripts.
+  * **Local Gemma-3n Insights**:
+    1. Feeds the Gurmukhi transcript into the same local Gemma 3n model.
+    2. Applies a prompt instructing it to translate/transliterate Gurmukhi to Devanagari and extract insights/knowledge tables.
+    3. Saves the report as `_devanagari_insights.md`.
+* **Input**: `Cleaned_Audio/[Filename]_cleaned.wav`, `Diarization_Outputs/[Filename]/[Filename]_timeline.json`, and Hugging Face token access.
 * **Output**: Saved inside `Diarization_Transcripts/[Filename]/`:
   - Chronological transcripts (`_diarized_transcript.txt` / `.md` / `.json`)
   - Speaker segregated texts (`_[Speaker]_transcript.txt`)
