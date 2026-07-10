@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     diarization_model: str = "pyannote/speaker-diarization-community-1"
     
     # LLM Settings
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.1-flash-lite"
     gemini_max_tokens: int = 4096
     gemini_temperature: float = 0.7
     
