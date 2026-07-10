@@ -174,7 +174,7 @@ class LLMAnalyzer:
 
     async def generate_narration(self, transcript: str, metadata: Dict[str, Any]) -> Dict[str, str]:
         prompt = f"""You are a professional rapporteur.
-        1. Create a "Cleaned Dictation" of this meeting transcript. It should look like a formal detailed narration of what happened, preserving the accuracy of the coordinator's or farmers' speech but removing filler words. It should be 2-3 detailed paragraphs.
+        1. Create a "Cleaned Dictation" of this meeting transcript in English. It should look like a formal detailed narration of what happened, preserving the accuracy of the coordinator's or farmers' speech but removing filler words. It should be 2-3 detailed paragraphs.
         2. Create a "Summary" of the entire interaction in 1 small paragraph.
         
         Return STRICTLY valid JSON:

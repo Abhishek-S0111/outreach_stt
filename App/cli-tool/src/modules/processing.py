@@ -18,6 +18,10 @@ import os
 import numpy as np
 from pyannote.audio import Pipeline
 from pyannote.audio.pipelines.utils.hook import ProgressHook
+from google import genai
+from google.genai import types
+import asyncio
+
 
 # --- Part 1: Audio Extractor ---
 
@@ -409,7 +413,7 @@ class TranscriptionService:
                             script_title = "Gurmukhi"
                             
                     asr_prompt = (
-                        f"Transcribe the following speech segment segment segment in {lang_title} into "
+                        f"Transcribe the following speech segment in {lang_title} into "
                         f"{script_title} text. Output only the raw transcript, with no "
                         f"introductory text or newlines."
                     )
@@ -481,49 +485,54 @@ class TranscriptionService:
 # --- Part 3: Translation Service ---
 
 class TranslationService:
-    """Translate Indian languages to English"""
+    """Translate Indian languages to English using Gemini API"""
     
     def __init__(self):
-        self.model = None
-        self.tokenizer = None
+        self.client = None
         self.model_loaded = False
-        self.lang_codes = {
-            "punjabi": "pan_Guru", "hindi": "hin_Deva", "english": "eng_Latn"
-            # Add other mappings from original file if needed
-        }
 
     def load_model(self):
         if not self.model_loaded:
-            log.info(f"Loading Translation model: {settings.translation_model}")
+            log.info("Initializing Gemini Client for Translation")
             try:
-                self.tokenizer = AutoTokenizer.from_pretrained(settings.translation_model, trust_remote_code=True)
-                self.model = AutoModelForSeq2SeqLM.from_pretrained(settings.translation_model, trust_remote_code=True)
-                if torch.cuda.is_available():
-                    self.model = self.model.cuda()
+                self.client = genai.Client(api_key=settings.gemini_api_key)
                 self.model_loaded = True
             except Exception as e:
-                log.error(f"Translation load failed: {e}")
+                log.error(f"Failed to initialize Gemini Client for translation: {e}")
                 raise
 
     async def translate(self, text: str, source_language: str, target_language: str = "english") -> str:
-        if source_language.lower() == "english": return text
-        try: self.load_model()
-        except: return text
+        if source_language.lower() == "english":
+            return text
+        try:
+            self.load_model()
+        except Exception:
+            return text
 
         try:
-            src_code = self.lang_codes.get(source_language.lower())
-            tgt_code = self.lang_codes.get(target_language.lower(), "eng_Latn")
-            if not src_code: return text
+            prompt = (
+                f"You are a professional translator. Translate the following text verbatim from "
+                f"{source_language} into {target_language}. Output ONLY the translated text, "
+                f"with no explanations, introductory text, markdown formatting, or surrounding quotes.\n\n"
+                f"Text:\n{text}"
+            )
             
-            inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-            if torch.cuda.is_available(): inputs = {k: v.cuda() for k, v in inputs.items()}
+            response = await asyncio.to_thread(
+                self.client.models.generate_content,
+                model=settings.gemini_model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    max_output_tokens=1024,
+                    temperature=0.0
+                )
+            )
             
-            with torch.no_grad():
-                gen_tokens = self.model.generate(**inputs, forced_bos_token_id=self.tokenizer.convert_tokens_to_ids(tgt_code), max_length=512)
-            return self.tokenizer.batch_decode(gen_tokens, skip_special_tokens=True)[0].strip()
+            translated_text = response.text.strip() if (response and response.text) else text
+            return translated_text
         except Exception as e:
-            log.warning(f"Translation failed: {e}")
+            log.warning(f"Translation failed via Gemini: {e}")
             return text
+
 
 # Global Instances
 audio_extractor = AudioExtractor()
