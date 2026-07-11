@@ -281,7 +281,7 @@ class TranscriptionService:
                 raise
                 
         elif model_type == "performance":
-            gemma_model_id = getattr(settings, "gemma_model_id", "google/gemma-3n-e4b-it")
+            gemma_model_id = getattr(settings, "gemma_model_id", "google/gemma-3n-e2b-it")
             log.info(f"Loading Gemma 3n model: {gemma_model_id}")
             try:
                 from transformers import AutoModelForMultimodalLM
@@ -328,11 +328,11 @@ class TranscriptionService:
             # Load cleaned audio at 16000Hz mono (required for these models)
             import librosa
             y, sr = librosa.load(audio_path, sr=16000, mono=True)
+            audio_duration = len(y) / sr
             
             # Fallback to whole file transcription if no segments are provided
             if not segments:
-                duration = len(y) / sr
-                segments = [{"start": 0.0, "end": duration, "speaker": "Speaker_0"}]
+                segments = [{"start": 0.0, "end": audio_duration, "speaker": "Speaker_0"}]
                 
             diarized_transcript_entries = []
             full_text_list = []
@@ -352,25 +352,137 @@ class TranscriptionService:
             torch_dtype = torch.float16 if device == "cuda" else torch.float32
             
             # Transcription Loop
-            for entry in segments:
-                start_sec = entry['start']
-                end_sec = entry['end']
-                speaker = entry['speaker']
+            if model_type == "performance":
+                # Gemma 3n Inference using the notebook's transcription methodology
+                total_samples = len(y)
+                target_len_samples = 30 * sr
+                chunks = []
                 
-                duration = end_sec - start_sec
-                if duration < 0.3:
-                    continue
+                # 1. Split logic based on RMS energy
+                start = 0
+                while start < total_samples:
+                    end = min(start + target_len_samples, total_samples)
+                    if end < total_samples:
+                        search_start = max(start, end - 5 * sr)
+                        search_range = y[search_start : end]
+                        rms = librosa.feature.rms(y=search_range, frame_length=2048, hop_length=512)[0]
+                        min_rms_idx = np.argmin(rms)
+                        silence_offset = (min_rms_idx * 512)
+                        end = search_start + silence_offset
+                        if end <= start:
+                            end = min(start + target_len_samples, total_samples)
+                    chunks.append((start, end))
+                    start = end
+                
+                log.info(f"Audio duration: {audio_duration:.2f}s | Split into {len(chunks)} chunks using RMS methodology.")
+                
+                # 2. Sequential transcription
+                for i, (chunk_start, chunk_end) in enumerate(chunks):
+                    start_sec = chunk_start / sr
+                    end_sec = chunk_end / sr
                     
-                # Slice chunk in-memory
-                start_sample = int(start_sec * sr)
-                end_sample = int(end_sec * sr)
-                chunk = y[start_sample:end_sample]
-                
-                if len(chunk) == 0:
-                    continue
-                
-                text = ""
-                if model_type == "efficient":
+                    chunk_data = y[chunk_start:chunk_end]
+                    if len(chunk_data) == 0:
+                        continue
+                        
+                    # Find matching speaker from diarization segments (if available)
+                    speaker = "Speaker_0"
+                    if segments:
+                        max_overlap = 0.0
+                        for seg in segments:
+                            overlap_start = max(start_sec, seg['start'])
+                            overlap_end = min(end_sec, seg['end'])
+                            overlap = overlap_end - overlap_start
+                            if overlap > max_overlap:
+                                max_overlap = overlap
+                                speaker = seg['speaker']
+                                
+                    # Language config
+                    lang_title = "Punjabi"
+                    script_title = "Gurmukhi"
+                    if language:
+                        lang_lower = language.lower()
+                        if lang_lower in ["hindi", "hi"]:
+                            lang_title = "Hindi"
+                            script_title = "Devanagari"
+                        elif lang_lower in ["english", "en"]:
+                            lang_title = "English"
+                            script_title = "Latin"
+                        elif lang_lower in ["punjabi", "pa"]:
+                            lang_title = "Punjabi"
+                            script_title = "Gurmukhi"
+                            
+                    asr_prompt = (
+                        f"Transcribe the following speech segment in {lang_title} into "
+                        f"{script_title} text. Output only the raw transcript, with no "
+                        f"introductory text or newlines."
+                    )
+                    
+                    messages = [
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "audio", "audio": chunk_data},
+                                {"type": "text", "text": asr_prompt},
+                            ],
+                        },
+                    ]
+                    
+                    gemma_device = self.model.device
+                    
+                    inputs = self.processor.apply_chat_template(
+                        messages,
+                        add_generation_prompt=True,
+                        tokenize=True,
+                        return_dict=True,
+                        return_tensors="pt",
+                    )
+                    
+                    inputs = {k: v.to(gemma_device) for k, v in inputs.items()}
+                    input_len = inputs["input_ids"].shape[-1]
+                    
+                    with torch.inference_mode():
+                        generated_ids = self.model.generate(
+                            **inputs,
+                            max_new_tokens=448,
+                            do_sample=False,
+                            repetition_penalty=1.1
+                        )
+                        
+                    response_ids = generated_ids[0][input_len:]
+                    text = self.processor.decode(response_ids, skip_special_tokens=True).strip()
+                    
+                    if text:
+                        time_str = f"[{format_time(start_sec)} - {format_time(end_sec)}]"
+                        diarized_transcript_entries.append({
+                            "start": start_sec,
+                            "end": end_sec,
+                            "time": time_str,
+                            "speaker": speaker,
+                            "text": text
+                        })
+                        full_text_list.append(f"{time_str} {speaker}: {text}")
+            
+            else:
+                # Whisper LoRA loop over speaker segments
+                for entry in segments:
+                    start_sec = entry['start']
+                    end_sec = entry['end']
+                    speaker = entry['speaker']
+                    
+                    segment_duration = end_sec - start_sec
+                    if segment_duration < 0.3:
+                        continue
+                        
+                    # Slice chunk in-memory
+                    start_sample = int(start_sec * sr)
+                    end_sample = int(end_sec * sr)
+                    chunk = y[start_sample:end_sample]
+                    
+                    if len(chunk) == 0:
+                        continue
+                    
+                    text = ""
                     # Whisper LoRA Inference
                     input_features = self.processor(
                         chunk,
@@ -396,74 +508,16 @@ class TranscriptionService:
                         )
                     text = self.processor.batch_decode(predicted_ids, skip_special_tokens=True)[0].strip()
                     
-                elif model_type == "performance":
-                    # Gemma 3n Inference
-                    lang_title = "Punjabi"
-                    script_title = "Gurmukhi"
-                    if language:
-                        lang_lower = language.lower()
-                        if lang_lower in ["hindi", "hi"]:
-                            lang_title = "Hindi"
-                            script_title = "Devanagari"
-                        elif lang_lower in ["english", "en"]:
-                            lang_title = "English"
-                            script_title = "Latin"
-                        elif lang_lower in ["punjabi", "pa"]:
-                            lang_title = "Punjabi"
-                            script_title = "Gurmukhi"
-                            
-                    asr_prompt = (
-                        f"Transcribe the following speech segment in {lang_title} into "
-                        f"{script_title} text. Output only the raw transcript, with no "
-                        f"introductory text or newlines."
-                    )
-                    
-                    messages = [
-                        {
-                            "role": "user",
-                            "content": [
-                                {"type": "audio", "audio": chunk},
-                                {"type": "text", "text": asr_prompt},
-                            ],
-                        },
-                    ]
-                    
-                    # For Gemma 3n, apply dtype correctly
-                    gemma_device = self.model.device
-                    gemma_dtype = torch.bfloat16 if "cuda" in str(gemma_device) else torch.float32
-                    
-                    inputs = self.processor.apply_chat_template(
-                        messages,
-                        add_generation_prompt=True,
-                        tokenize=True,
-                        return_dict=True,
-                        return_tensors="pt",
-                    )
-                    
-                    inputs = {k: v.to(gemma_device) for k, v in inputs.items()}
-                    input_len = inputs["input_ids"].shape[-1]
-                    
-                    with torch.no_grad():
-                        generated_ids = self.model.generate(
-                            **inputs,
-                            max_new_tokens=256,
-                            do_sample=False,
-                            repetition_penalty=1.1
-                        )
-                        
-                    response_ids = generated_ids[0][input_len:]
-                    text = self.processor.decode(response_ids, skip_special_tokens=True).strip()
-                
-                if text:
-                    time_str = f"[{format_time(start_sec)} - {format_time(end_sec)}]"
-                    diarized_transcript_entries.append({
-                        "start": start_sec,
-                        "end": end_sec,
-                        "time": time_str,
-                        "speaker": speaker,
-                        "text": text
-                    })
-                    full_text_list.append(f"{time_str} {speaker}: {text}")
+                    if text:
+                        time_str = f"[{format_time(start_sec)} - {format_time(end_sec)}]"
+                        diarized_transcript_entries.append({
+                            "start": start_sec,
+                            "end": end_sec,
+                            "time": time_str,
+                            "speaker": speaker,
+                            "text": text
+                        })
+                        full_text_list.append(f"{time_str} {speaker}: {text}")
             
             full_text = "\n".join(full_text_list).strip()
             log.info(f"Transcription complete using {model_type}.")
@@ -474,7 +528,7 @@ class TranscriptionService:
                 "text": full_text,
                 "language": language or "punjabi",
                 "language_probability": 1.0,
-                "duration": len(y) / sr,
+                "duration": audio_duration,
                 "segments": diarized_transcript_entries
             }
             
@@ -501,7 +555,7 @@ class TranslationService:
                 log.error(f"Failed to initialize Gemini Client for translation: {e}")
                 raise
 
-    async def translate(self, text: str, source_language: str, target_language: str = "english") -> str:
+    async def translate(self, text: str, source_language: str, target_language: str = "english", has_segments: bool = False) -> str:
         if source_language.lower() == "english":
             return text
         try:
@@ -510,19 +564,32 @@ class TranslationService:
             return text
 
         try:
-            prompt = (
-                f"You are a professional translator. Translate the following text verbatim from "
-                f"{source_language} into {target_language}. Output ONLY the translated text, "
-                f"with no explanations, introductory text, markdown formatting, or surrounding quotes.\n\n"
-                f"Text:\n{text}"
-            )
+            if has_segments:
+                prompt = (
+                    f"You are a professional translator. Translate the dialogue text of the following transcript verbatim from "
+                    f"{source_language} into {target_language}.\n\n"
+                    f"The transcript contains speaker labels and timestamps in the format: '[HH:MM:SS.m - HH:MM:SS.m] Speaker_X: dialogue text'. "
+                    f"You MUST preserve all timestamps, speaker labels, line breaks, and structure exactly as they are. "
+                    f"Only translate the spoken dialogue text. Do not modify, omit, or translate the timestamps or speaker labels.\n"
+                    f"Output ONLY the translated transcript, with no explanations, introductory text, markdown formatting, or surrounding quotes.\n\n"
+                    f"Transcript:\n{text}"
+                )
+            else:
+                prompt = (
+                    f"You are a professional translator. Translate the following text verbatim from "
+                    f"{source_language} into {target_language}. Output ONLY the translated text, "
+                    f"with no explanations, introductory text, markdown formatting, or surrounding quotes.\n\n"
+                    f"Text:\n{text}"
+                )
+            
+            max_tokens = 10000
             
             response = await asyncio.to_thread(
                 self.client.models.generate_content,
                 model=settings.gemini_model,
                 contents=prompt,
                 config=types.GenerateContentConfig(
-                    max_output_tokens=1024,
+                    max_output_tokens=max_tokens,
                     temperature=0.0
                 )
             )
