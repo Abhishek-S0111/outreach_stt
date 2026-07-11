@@ -178,26 +178,8 @@ class PipelineOrchestrator:
         lang_map = {'pa': 'punjabi', 'hi': 'hindi', 'en': 'english'} # Add full map if needed
         full_lang = lang_map.get(src_lang, src_lang)
         
-        # If segments exist, translate segments in parallel to preserve timestamps/speakers
-        # and prevent model length truncation issues while keeping processing fast
-        if segments:
-            log.info(f"Translating {len(segments)} segments in parallel")
-            
-            async def translate_segment(entry):
-                text_to_translate = entry.get('text', '')
-                if text_to_translate.strip():
-                    translated_text = await translation_service.translate(text_to_translate, full_lang)
-                else:
-                    translated_text = ""
-                time_str = entry.get('time', '')
-                speaker = entry.get('speaker', '')
-                return f"{time_str} {speaker}: {translated_text}"
-            
-            tasks = [translate_segment(entry) for entry in segments]
-            translated_lines = await asyncio.gather(*tasks)
-            translation = "\n".join(translated_lines).strip()
-        else:
-            translation = await translation_service.translate(raw_text, full_lang)
+        # Translate the entire transcription in one go
+        translation = await translation_service.translate(raw_text, full_lang, has_segments=bool(segments))
             
         await db_manager.update_interaction(iid, {'translation': translation, 'status.translated': True})
         return translation

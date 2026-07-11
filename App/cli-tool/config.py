@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     # Advanced Model Settings
     whisper_base_model: str = "openai/whisper-large-v3-turbo"
     whisper_lora_repo: str = "Garden2006/whisper-large-v3-turbo-gurmukhi-lora"
-    gemma_model_id: str = "google/gemma-3n-e4b-it"
+    gemma_model_id: str = "google/gemma-3n-e2b-it"
     
     # Translation Settings
     translation_model: str = "ai4bharat/indictrans2-en-indic-1B"
@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     
     # LLM Settings
     gemini_model: str = "gemini-3.1-flash-lite"
-    gemini_max_tokens: int = 4096
+    gemini_max_tokens: int = 10000
     gemini_temperature: float = 0.7
     
     # API Server

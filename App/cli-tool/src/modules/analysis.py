@@ -87,7 +87,7 @@ class ParticipantParser:
                 prompt = f"""Analyze the following transcript of a rural village meeting and extract the names of all farmers or participants who spoke or were mentioned.
                 
                 Transcript:
-                {transcript[:15000]}
+                {transcript}
                 
                 Instructions:
                 1. Identify specific individual names of farmers/participants.
@@ -183,7 +183,7 @@ class LLMAnalyzer:
             "summary": "..."
         }}
 
-        Transcript: {transcript[:25000]}"""
+        Transcript: {transcript}"""
         
         response_text = await self._call_gemini(prompt)
         try:
@@ -209,7 +209,7 @@ class LLMAnalyzer:
         1. Output ONLY the challenges in English.
         2. Format as a numbered list.
         
-        Transcript: {transcript[:25000]}"""
+        Transcript: {transcript}"""
         text = await self._call_gemini(prompt)
         return self._parse_list(text)
 
@@ -222,7 +222,7 @@ class LLMAnalyzer:
         
         Return them as a numbered list of ONLY the Agricultural questions.
         
-        Transcript: {transcript[:25000]}"""
+        Transcript: {transcript}"""
         text = await self._call_gemini(prompt)
         return self._parse_list(text)
 
@@ -247,7 +247,7 @@ class LLMAnalyzer:
             "farmer_counts": {{ "male": 0, "female": 0, "total": 0 }}
         }}
         
-        Transcript: {transcript[:15000]}"""
+        Transcript: {transcript}"""
         
         try:
             res = await self._call_gemini(prompt)
@@ -299,7 +299,7 @@ class LLMAnalyzer:
         - White Tela -> White-backed Planthopper -> Sogatella furcifera
         - Bona Rog -> Dwarfing -> Rice Dwarf
         
-        Transcript: {transcript[:20000]}"""
+        Transcript: {transcript}"""
         
         try:
             res = await self._call_gemini(prompt)
@@ -328,7 +328,7 @@ class LLMAnalyzer:
 3. Actionable recommendations or next steps
 
 Meeting Summary:
-{narration[:2000]}
+{narration}
 
 Key Challenges:
 {chr(10).join(f"- {c}" for c in challenges[:5])}
